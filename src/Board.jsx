@@ -1,6 +1,11 @@
 import React, { useState } from "react";
 import Cell from "./Cell";
 import "./Board.css";
+import { getLightOn } from "./helpers";
+
+const DEFAULT_ROWS = 1;
+const DEFAULT_COLS = 1;
+const DEFAULT_CHANCE_LIGHT_STARTS_ON = .3;
 
 /** Game board of Lights out.
  *
@@ -27,20 +32,24 @@ import "./Board.css";
  *
  **/
 
-function Board({ nrows, ncols, chanceLightStartsOn }) {
-  const [board, setBoard] = useState(createBoard());
-
+function Board({ nrows = DEFAULT_ROWS, ncols = DEFAULT_COLS, chanceLightStartsOn = DEFAULT_CHANCE_LIGHT_STARTS_ON}) {
+  const [board, setBoard] = useState(createBoard);
   /** create a board nrows high/ncols wide, each cell randomly lit or unlit */
   function createBoard() {
-    let initialBoard = [];
-    // TODO: create array-of-arrays of true/false values
+    let initialBoard = Array.from({length : nrows}, () => {
+      return Array.from({length : ncols}, () => getLightOn(chanceLightStartsOn))
+    });
     return initialBoard;
   }
 
+  /** Checks if all lights are off. */
   function hasWon() {
-    // TODO: check the board in state to determine whether the player has won.
+    return board.every(r => r.every(c => c === false));
   }
 
+  /** Flips cell at coord and its neighbors.
+   * Takes string coord ('y-x').
+   */
   function flipCellsAround(coord) {
     setBoard(oldBoard => {
       const [y, x] = coord.split("-").map(Number);
@@ -53,21 +62,42 @@ function Board({ nrows, ncols, chanceLightStartsOn }) {
         }
       };
 
-      // TODO: Make a (deep) copy of the oldBoard
+      const newBoard = oldBoard.map(r => [...r]);
 
-      // TODO: in the copy, flip this cell and the cells around it
+      flipCell(y, x, newBoard);
+      flipCell(y-1, x, newBoard);
+      flipCell(y+1, x, newBoard);
+      flipCell(y, x-1, newBoard);
+      flipCell(y, x+1, newBoard);
 
-      // TODO: return the copy
+      return newBoard;
     });
   }
 
-  // if the game is won, just show a winning msg & render nothing else
+  // TODO: create board outside of return stmt
+  const htmlBoard = (
+                    <table>
+                      <tbody>
+                      {board.map((r, rIdx) =>
+                        <tr key={rIdx}>
+                        {r.map((c, cIdx) =>
+                        <Cell
+                          key={`${rIdx}-${cIdx}`}
+                          flipCellsAroundMe={(evt) => flipCellsAround(`${rIdx}-${cIdx}`)}
+                          isLit={c} />
+                        )}
+                        </tr>
+                      )}
+                      </tbody>
+                    </table>
+                    )
 
-  // TODO
 
-  // make table board
-
-  // TODO
+  return (
+    <div>{hasWon() && 'YOU WIN!'}
+    {htmlBoard}
+    </div>
+  );
 }
 
 export default Board;
