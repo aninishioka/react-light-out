@@ -74,7 +74,6 @@ function Board({ nrows = DEFAULT_ROWS, ncols = DEFAULT_COLS, chanceLightStartsOn
     });
   }
 
-  // TODO: create board outside of return stmt
   const htmlBoard = (
                     <table>
                       <tbody>
@@ -92,10 +91,11 @@ function Board({ nrows = DEFAULT_ROWS, ncols = DEFAULT_COLS, chanceLightStartsOn
                     </table>
                     )
 
+  const win = hasWon()
 
   return (
-    <div>{hasWon() && 'YOU WIN!'}
-    {htmlBoard}
+    <div> {win && <span id="winMsg">'YOU WIN!'</span>}
+    {!win && htmlBoard}
     </div>
   );
 }
